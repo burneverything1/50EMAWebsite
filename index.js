@@ -97,7 +97,6 @@ async function get_payload(){
 app.get('/delete-database', (req, res) => {
   // clear every key in database
   db.list().then(keys => {
-    console.log(keys)
     keys.forEach(element =>{
       console.log('deleted in database: ' + element)
       db.delete(element).then(() => {});
