@@ -50,29 +50,59 @@ app.get('/get-prices', (req, res) => {
 var reqsave = {}
 
 app.get('/get-ema', (req, res) => {
-  get7EMA('IBM')
-  res.send('got EMA prices for IBM')
+  // check if ticker
+  if (!req.query.ticker){
+    res.send('You didnt include a ticker')
+    return
+  }
+  let ticker = req.query.ticker
+  get7EMA(ticker)
+  res.send(`got EMA prices for ${ticker}`)
 })
 
 app.get('/get-7day', (req, res) => {
-  get7Day('IBM')
-  res.send('got 7day prices for IBM')
+  // check if ticker
+  if (!req.query.ticker){
+    res.send('You didnt include a ticker')
+    return
+  }
+  let ticker = req.query.ticker
+  get7Day(ticker)
+  res.send(`got 7day prices for ${ticker}`)
 })
 
-app.get('/load-database', (req, res) => {
-  db.list().then(keys => {
-    let price_array = []
-    keys.forEach( element =>{
-      price_array.push(db.get(element))
-    })
-    let payload = {
-      "keys": keys,
-      "price_array": price_array
-    }
-    res.send(payload)
-    console.log('database keys loaded to client')
-  });
+app.get('/load-database', async (req, res) => {
+  // wait for get_payload
+  let payload = {}
+  payload = await get_payload()
+  res.send(payload)
+  console.log('database keys loaded to client')
 })
+
+async function get_payload(){
+  // function to get prices from database, async to handle database return time
+  let keys = []
+  let price_array = []
+
+  keys = await db.list()
+
+  let keys_pull = async function(keys){
+    let return_array = []
+    for (i = 0; i < keys.length; i++){
+      let price = await db.get(keys[i])
+      return_array.push(price)
+    }
+    return return_array
+  }
+
+  price_array = await keys_pull(keys)
+  
+  let payload = {
+    "keys": keys,
+    "price_array": price_array
+  }
+  return payload
+}
 
 app.get('/delete-database', (req, res) => {
   // clear every key in database
