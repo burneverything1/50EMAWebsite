@@ -51,20 +51,40 @@ var reqsave = {}
 
 app.get('/get-ema', (req, res) => {
   get7EMA('IBM')
+  res.send('got EMA prices for IBM')
 })
 
 app.get('/get-7day', (req, res) => {
   get7Day('IBM')
+  res.send('got 7day prices for IBM')
+})
+
+app.get('/load-database', (req, res) => {
+  db.list().then(keys => {
+    let price_array = []
+    keys.forEach( element =>{
+      price_array.push(db.get(element))
+    })
+    let payload = {
+      "keys": keys,
+      "price_array": price_array
+    }
+    res.send(payload)
+    console.log('database keys loaded to client')
+  });
 })
 
 app.get('/delete-database', (req, res) => {
+  // clear every key in database
   db.list().then(keys => {
     console.log(keys)
     keys.forEach(element =>{
-      console.log(element)
+      console.log('deleted in database: ' + element)
       db.delete(element).then(() => {});
     })
   });
+  console.log('deleted database')
+  res.send('cleared database')
 })
 
 
@@ -95,10 +115,11 @@ function store7EMA (alpharesponse) {
   for (i = 0; i < 7; i++){
     let ticker = alpharesponse["Meta Data"]["1: Symbol"]
     let date = Object.keys(alpharesponse["Technical Analysis: EMA"])[i]
-    let lastEMA = alpharesponse["Technical Analysis: EMA"][date]["EMA"]
-    let lastdaykey = `${ticker}-EMA-${date}`
-    console.log('saved EMA as ' + lastdaykey)
-    db.set(lastdaykey, lastEMA).then(() => {});
+    let emaPrice = alpharesponse["Technical Analysis: EMA"][date]["EMA"]
+    let emaDaykey = `${ticker}*EMA*${date}`
+    db.set(emaDaykey, emaPrice).then(() => {
+      console.log('saved EMA as ' + emaDaykey)
+    });
   }
 }
 
@@ -108,7 +129,9 @@ function get7Day (ticker) {
   req.open('GET', `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker}&outputsize=compact&apikey=${alphavantagekey}`)
   req.addEventListener('load', function(){
     if (req.status >= 200 && req.status <= 400){
+      reqsave = JSON.parse(req.responseText)
       console.log('got 7day for ' + ticker)
+      store7day(reqsave)
     }
     else {
       console.log("Error in network request: " + req.statusText)
@@ -119,8 +142,14 @@ function get7Day (ticker) {
 
 function store7day (alpharesponse) {
   // save last 7 days of EMA price data
-  for (i = 9; i < 7; i++) {
-
+  for (i = 0; i < 7; i++) {
+    let ticker = alpharesponse["Meta Data"]["2. Symbol"]
+    let date = Object.keys(alpharesponse["Time Series (Daily)"])[i]
+    let day7price = alpharesponse["Time Series (Daily)"][date]["4. close"]
+    let day7key = `${ticker}*7day*${date}`
+    db.set(day7key, day7price).then(() => {
+      console.log('saved 7day as ' + day7key)
+    })
   }
 }
 
