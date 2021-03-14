@@ -10,6 +10,9 @@ function getStocks() {
   req.addEventListener('load', () => {
     if (req.status >= 200 && req.status <= 400){
       payload = JSON.parse(req.responseText)
+      // check if database is too full
+
+
       createTable(payload.keys, payload.price_array)
     }
   })
@@ -35,6 +38,20 @@ function bindbuttons(){
     req.addEventListener('load', () =>{
       if (req.status >= 200 && req.status <= 400){
         console.log('got prices for ' + input)
+        setTimeout(()=>{getStocks()}, 1500)
+      }
+    })
+    req.send()
+  })
+  document.getElementById('cleardatabase').addEventListener('click', (event) =>{
+    event.stopImmediatePropagation()
+    event.preventDefault()
+
+    let req = new XMLHttpRequest()
+    req.open('GET', baseUrl + '/delete-database', true)
+    req.addEventListener('load', () =>{
+      if (req.status >= 200 && req.status <= 400) {
+        console.log('database cleared')
         setTimeout(()=>{getStocks()}, 1500)
       }
     })
