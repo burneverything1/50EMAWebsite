@@ -61,15 +61,7 @@ app.get('/get-7day', (req, res) => {
 
 app.get('/load-database', (req, res) => {
   db.list().then(keys => {
-    let price_array = []
-    keys.forEach( element =>{
-      price_array.push(db.get(element))
-    })
-    let payload = {
-      "keys": keys,
-      "price_array": price_array
-    }
-    res.send(payload)
+    res.send(keys)
     console.log('database keys loaded to client')
   });
 })
