@@ -49,26 +49,16 @@ app.get('/get-prices', (req, res) => {
 */
 var reqsave = {}
 
-app.get('/get-ema', (req, res) => {
+app.get('/get-prices', async (req, res) => {
   // check if ticker
   if (!req.query.ticker){
     res.send('You didnt include a ticker')
     return
   }
   let ticker = req.query.ticker
-  get7EMA(ticker)
-  res.send(`got EMA prices for ${ticker}`)
-})
-
-app.get('/get-7day', (req, res) => {
-  // check if ticker
-  if (!req.query.ticker){
-    res.send('You didnt include a ticker')
-    return
-  }
-  let ticker = req.query.ticker
-  get7Day(ticker)
-  res.send(`got 7day prices for ${ticker}`)
+  await get7EMA(ticker)
+  await get7Day(ticker)
+  res.send()
 })
 
 app.get('/load-database', async (req, res) => {
@@ -127,11 +117,11 @@ function get7EMA (ticker) {
   // make request to Alphavantage for EMA price data
   var req = new XMLHttpRequest()
   req.open('GET', `https://www.alphavantage.co/query?function=EMA&symbol=${ticker}&interval=daily&time_period=50&series_type=close&apikey=${alphavantagekey}`)
-  req.addEventListener('load', function(){
+  req.addEventListener('load', async function(){
     if (req.status >= 200 && req.status <= 400){
       reqsave = JSON.parse(req.responseText)
       console.log('Got EMA of ' + ticker)
-      store7EMA(reqsave)
+      await store7EMA(reqsave)
     }
     else {
       console.log("Error in network request: " + req.statusText)
@@ -157,11 +147,11 @@ function get7Day (ticker) {
   // make request to alphavantqage for price data
   var req = new XMLHttpRequest()
   req.open('GET', `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker}&outputsize=compact&apikey=${alphavantagekey}`)
-  req.addEventListener('load', function(){
+  req.addEventListener('load', async function(){
     if (req.status >= 200 && req.status <= 400){
       reqsave = JSON.parse(req.responseText)
       console.log('got 7day for ' + ticker)
-      store7day(reqsave)
+      await store7day(reqsave)
     }
     else {
       console.log("Error in network request: " + req.statusText)

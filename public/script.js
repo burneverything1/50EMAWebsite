@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', getStocks)
+document.addEventListener('DOMContentLoaded', bindbuttons)
 
 var baseUrl = 'https://50EMAWebsite.burneverything.repl.co/'
 
 function getStocks() {
+  // pull the currently saved stock prices from database and create table
   let req = new XMLHttpRequest()
   req.open('GET', (baseUrl + '/load-database'), true)
   req.addEventListener('load', () => {
@@ -14,7 +16,34 @@ function getStocks() {
   req.send()
 }
 
+function bindbuttons(){
+  document.getElementById('submitstocksearch').addEventListener('click', (event) =>{
+    event.stopImmediatePropagation()
+    event.preventDefault()
+  
+    let input = document.getElementById('stocksearch').value
+    
+    // check for ticker
+    if (input === ""){
+      console.log('Need stock ticker')
+      return
+    }
+    // check for no symbols
+
+    let req = new XMLHttpRequest()
+    req.open('GET', baseUrl + `/get-prices?ticker=${input}`, true)
+    req.addEventListener('load', () =>{
+      if (req.status >= 200 && req.status <= 400){
+        console.log('got prices for ' + input)
+        setTimeout(()=>{getStocks()}, 1500)
+      }
+    })
+    req.send()
+  })
+}
+
 function createTable(keys, prices) {
+  // use database prices to create HTML table
   var body = document.getElementById('stockbody')
 
   // clear existing rows
@@ -48,6 +77,7 @@ function createTable(keys, prices) {
       for (j = 2; j < 9; j++){
         let d_cell = row.insertCell(j)
         d_cell.innerHTML = prices[i + (j - 2)]
+        d_cell.className = 'dollars'
       }
     }
 
