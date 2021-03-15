@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-03L7HPKVZP"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-03L7HPKVZP');
+    </script>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="script.js"></script>
     <link rel="stylesheet" href="style.css">
-    <title>Home Page</title>
+    <title>50 EMA Website</title>
 </head>
 <body>
     <h1>50 EMA Stock Chart</h1>
@@ -14,14 +23,14 @@
     <fieldset>
       <legend>Search a Stock's 50 EMA Closing Prices</legend>
       <label for="stocksearch">Input Stock Ticker: </label>
-      <input type="text" name="stocksearch" id="stocksearch">
+      <input type="text" name="stocksearch" id="stocksearch" placeholder="AMAT">
       <input type="submit" id="submitstocksearch" value="Search 50EMA">
     </fieldset>
 
     <h2>50 EMA Searched Today</h2>
+    <!--
     <input type="submit" id="cleardatabase" value="Clear Database">
-    <br>
-    <br>
+    -->
     <table>
       <thead>
         <tr>

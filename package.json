@@ -7,6 +7,7 @@
     "fs": "0.0.1-security",
     "mysql": "^2.18.1",
     "node": "^15.10.0",
+    "node-schedule": "^2.0.0",
     "xmlhttprequest": "^1.8.0"
   }
 }

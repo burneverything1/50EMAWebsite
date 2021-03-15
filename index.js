@@ -1,11 +1,12 @@
-var express = require('express')
+const express = require('express')
 var app = express()
 app.use(express.static('public'))
 //require('dotenv').config();
+const schedule = require('node-schedule')
 
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
-var fs = require('fs');
+const fs = require('fs');
 
 const Database = require("@replit/database")
 const db = new Database()
@@ -50,12 +51,13 @@ app.get('/get-prices', (req, res) => {
 var reqsave = {}
 
 app.get('/get-prices', async (req, res) => {
-  // check if ticker
+  // check if ticker is given
   if (!req.query.ticker){
     res.send('You didnt include a ticker')
     return
   }
-  let ticker = req.query.ticker
+  let ticker = req.query.ticker.toUpperCase()
+
   await get7EMA(ticker)
   await get7Day(ticker)
   res.send()
@@ -66,7 +68,13 @@ app.get('/load-database', async (req, res) => {
   let payload = {}
   payload = await get_payload()
   res.send(payload)
-  console.log('database keys loaded to client')
+  let d = Date(Date.now())
+  let log_alert = '\ndatabase keys loaded to client' + ' ' + d.toString()
+  fs.appendFile('log.txt', log_alert,(err)=>{
+    if (err){
+      console.log(err)
+    }
+  })
 })
 
 async function get_payload(){
@@ -96,15 +104,27 @@ async function get_payload(){
 
 app.get('/delete-database', (req, res) => {
   // clear every key in database
+  clear_db()
+  res.send('cleared database')
+})
+
+function clear_db (){
   db.list().then(keys => {
     keys.forEach(element =>{
-      console.log('deleted in database: ' + element)
       db.delete(element).then(() => {});
     })
   });
-  console.log('deleted database')
-  res.send('cleared database')
-})
+  let d = Date(Date.now)
+  let log_alert = '\ndeleted database ' + d.toString()
+  fs.appendFile('log.txt', log_alert, (err) =>{
+    if (err){
+      console.log(err)
+    }
+  })
+}
+
+// schedule delete database for every night
+schedule.scheduleJob('0 0 * * *', clear_db)
 
 
 app.listen(app.get('port'), function(){
@@ -119,7 +139,13 @@ function get7EMA (ticker) {
   req.addEventListener('load', async function(){
     if (req.status >= 200 && req.status <= 400){
       reqsave = JSON.parse(req.responseText)
-      console.log('Got EMA of ' + ticker)
+      let d = Date(Date.now())
+      let log_alert = '\nGot EMA of ' + ticker + ' ' + d.toString()
+      fs.appendFile('log.txt', log_alert, (err) =>{
+        if (err){
+          console.log(err)
+        }
+      })
       await store7EMA(reqsave)
     }
     else {
@@ -131,15 +157,20 @@ function get7EMA (ticker) {
 
 function store7EMA (alpharesponse) {
   // save last 7 days of EMA price data
+  let ticker = alpharesponse["Meta Data"]["1: Symbol"]
   for (i = 0; i < 7; i++){
-    let ticker = alpharesponse["Meta Data"]["1: Symbol"]
     let date = Object.keys(alpharesponse["Technical Analysis: EMA"])[i]
     let emaPrice = alpharesponse["Technical Analysis: EMA"][date]["EMA"]
     let emaDaykey = `${ticker}*EMA*${date}`
-    db.set(emaDaykey, emaPrice).then(() => {
-      console.log('saved EMA as ' + emaDaykey)
-    });
+    db.set(emaDaykey, emaPrice)
   }
+  let d = Date(Date.now())
+  let log_alert = '\nsaved EMA as ' + ticker + ' ' + d.toString()
+  fs.appendFile('log.txt', log_alert, (err)=>{
+    if (err){
+      console.log(err)
+    }
+  })
 }
 
 function get7Day (ticker) {
@@ -149,7 +180,13 @@ function get7Day (ticker) {
   req.addEventListener('load', async function(){
     if (req.status >= 200 && req.status <= 400){
       reqsave = JSON.parse(req.responseText)
-      console.log('got 7day for ' + ticker)
+      let d = Date(Date.now())
+      let log_alert = '\ngot 7day for ' + ticker + ' ' + d.toString()
+      fs.appendFile('log.txt', log_alert, (err)=>{
+        if (err){
+          console.log(err)
+        }
+      })
       await store7day(reqsave)
     }
     else {
@@ -161,17 +198,18 @@ function get7Day (ticker) {
 
 function store7day (alpharesponse) {
   // save last 7 days of EMA price data
+  let ticker = alpharesponse["Meta Data"]["2. Symbol"]
   for (i = 0; i < 7; i++) {
-    let ticker = alpharesponse["Meta Data"]["2. Symbol"]
     let date = Object.keys(alpharesponse["Time Series (Daily)"])[i]
     let day7price = alpharesponse["Time Series (Daily)"][date]["4. close"]
     let day7key = `${ticker}*7day*${date}`
-    db.set(day7key, day7price).then(() => {
-      console.log('saved 7day as ' + day7key)
-    })
+    db.set(day7key, day7price)
   }
-}
-
-function store7Day () {
-
+  let d = Date(Date.now())
+  let log_alert = '\nsaved 7day as ' + ticker + ' ' + d.toString()
+  fs.appendFile('log.txt', log_alert, (err)=>{
+    if (err){
+      console.log(err)
+    }
+  })
 }
