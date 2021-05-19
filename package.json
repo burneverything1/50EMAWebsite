@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@replit/database": "^2.0.0",
     "dotenv": "^8.2.0",

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', getStocks)
 document.addEventListener('DOMContentLoaded', bindbuttons)
 
-var baseUrl = 'https://50EMAWebsite.burneverything.repl.co/'
+var baseUrl = 'https://50emawebsite.burneverything1.repl.co/'
 
 function getStocks() {
   // pull the currently saved stock prices from database and create table
@@ -43,6 +43,7 @@ function bindbuttons(){
     })
     req.send()
   })
+
   document.getElementById('cleardatabase').addEventListener('click', (event) =>{
     event.stopImmediatePropagation()
     event.preventDefault()

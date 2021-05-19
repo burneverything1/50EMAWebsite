@@ -28,6 +28,7 @@ var stocktwitskey = 'ba52e2cfa75086be'
 var alphavantagekey = 'U289CFULY2G94EU9'
 
 app.get('/', (req,res) =>{
+    console.log('home redirect')
     res.sendFile(__dirname + '/public/home.html')
 })
 
@@ -51,6 +52,7 @@ app.get('/get-prices', (req, res) => {
 var reqsave = {}
 
 app.get('/get-prices', async (req, res) => {
+  console.log('get-prices request')
   // check if ticker is given
   if (!req.query.ticker){
     res.send('You didnt include a ticker')
@@ -64,6 +66,7 @@ app.get('/get-prices', async (req, res) => {
 })
 
 app.get('/load-database', async (req, res) => {
+  console.log('load-database request')
   // wait for get_payload
   let payload = {}
   payload = await get_payload()
@@ -133,6 +136,7 @@ app.listen(app.get('port'), function(){
 
 
 function get7EMA (ticker) {
+  console.log('get7EMA')
   // make request to Alphavantage for EMA price data
   var req = new XMLHttpRequest()
   req.open('GET', `https://www.alphavantage.co/query?function=EMA&symbol=${ticker}&interval=daily&time_period=50&series_type=close&apikey=${alphavantagekey}`)
@@ -156,6 +160,7 @@ function get7EMA (ticker) {
 }
 
 function store7EMA (alpharesponse) {
+  console.log('store7EMA')
   // save last 7 days of EMA price data
   let ticker = alpharesponse["Meta Data"]["1: Symbol"]
   for (i = 0; i < 7; i++){
@@ -174,6 +179,7 @@ function store7EMA (alpharesponse) {
 }
 
 function get7Day (ticker) {
+  console.log('get7day')
   // make request to alphavantqage for price data
   var req = new XMLHttpRequest()
   req.open('GET', `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker}&outputsize=compact&apikey=${alphavantagekey}`)
@@ -197,6 +203,7 @@ function get7Day (ticker) {
 }
 
 function store7day (alpharesponse) {
+  console.log('store7day')
   // save last 7 days of EMA price data
   let ticker = alpharesponse["Meta Data"]["2. Symbol"]
   for (i = 0; i < 7; i++) {
